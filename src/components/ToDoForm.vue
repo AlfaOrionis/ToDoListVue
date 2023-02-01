@@ -1,44 +1,76 @@
 <template>
   <div class="container">
-    <form class="form">
+    <form @submit.prevent="onSubmit" class="form">
       <div class="wrapper">
         <label class="wrapper__label">Title</label>
-        <input class="wrapper__input" />
+        <input v-model="title" id="title" class="wrapper__input" />
       </div>
 
       <div class="wrapper">
-        <label class="wrapper__label">Description</label>
-        <textarea @keyup="adjustHeight" class="wrapper__input" />
+        <label class="wrapper__label">Description {{ description }}</label>
+        <textarea
+          v-model="description"
+          @keyup="adjustHeight"
+          class="wrapper__input"
+        />
       </div>
 
       <div class="wrapper">
         <label class="wrapper__label">Deadline</label>
-        <input class="wrapper__input" />
+        <input type="date" @input="dateHandler" class="wrapper__input" />
+      </div>
+
+      <div class="wrapper">
+        <input type="time" @input="timeHandler" class="wrapper__input" />
       </div>
 
       <div class="wrapper">
         <label class="wrapper__label">Important</label>
         <input
+          v-model="isImportant"
           type="checkbox"
+          id="checkbox"
           class="wrapper__input wrapper__input--checkbox"
         />
       </div>
+      <button type="submit">Add</button>
     </form>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from "vue";
+<script setup lang="ts">
+import { ref, reactive, onMounted, defineProps } from "vue";
+import { adjustHeight } from "../tools/tools";
 
-export default defineComponent({
-  name: "ToDoForm",
-  methods: {
-    adjustHeight(e: Event) {
-      (e.target as HTMLInputElement).style.height = "auto";
-      (e.target as HTMLInputElement).style.height = `${(e.target as HTMLInputElement).scrollHeight}px`;
-    },
-  },
+const props = defineProps(["submitHandler"]);
+
+const title = ref("");
+const isImportant = ref(false);
+const description = ref("");
+
+const deadline = reactive({
+  date: "",
+  time: "",
 });
+
+const dateHandler = (e: Event) => {
+  deadline.date = (e.target as HTMLInputElement).value;
+};
+const timeHandler = (e: Event) => {
+  console.log(deadline);
+  deadline.time = (e.target as HTMLInputElement).value;
+};
+
+const onSubmit = () => {
+  props.submitHandler({
+    id: 1,
+    title: title.value,
+    description: description.value,
+    date: deadline.date,
+    time: deadline.time,
+    important: isImportant.value,
+  });
+};
 </script>
 
 <style scoped>
@@ -83,6 +115,7 @@ export default defineComponent({
 .wrapper__input:focus {
   box-shadow: rgb(0, 0, 255) 0px 0px 10px 2px;
 }
+
 .wrapper__input--checkbox:focus {
   box-shadow: none;
 }
